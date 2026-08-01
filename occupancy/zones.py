@@ -12,11 +12,18 @@
 Aynı kişinin aynı yönde iki kez sayılmaması kritik: kapıda duraksayan biri
 sayacı şişirmemeli. Bu yüzden sayılmış her `(kişi, çizgi, yön)` üçlüsü
 hatırlanır.
+
+Buna ek olarak çizginin iki yanında `crossing_band_px` genişliğinde bir
+kararsız bant vardır. Kişinin çizgiye göre tarafı yalnızca bu bandın dışında
+güncellenir. Sebebi ölçülmüş bir hata: gerçek videoda bbox'ın ayak noktası
+geçişten hemen sonra birkaç piksel geri kayıyor ve sistem bunu ters yönde
+ikinci bir geçiş sanıyordu — her gerçek geçiş bir fazladan olay üretiyordu.
 """
 
 from __future__ import annotations
 
 import json
+import math
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -33,6 +40,11 @@ logger = get_logger(__name__)
 
 class ZoneConfigError(Exception):
     """Bölge tanım dosyası okunamadığında veya geçersiz olduğunda atılır."""
+
+
+#: Çizginin iki yanındaki kararsız bandın yarı genişliği (piksel). 1080p'de
+#: yürüyen birinin ayak noktası kare başına ~10-20 piksel oynayabiliyor.
+VARSAYILAN_BANT_PX = 25.0
 
 
 @dataclass(frozen=True)
@@ -77,6 +89,17 @@ class CrossingLine:
         (ax, ay), (bx, by) = self.a, self.b
         return (bx - ax) * (point[1] - ay) - (by - ay) * (point[0] - ax)
 
+    @property
+    def length(self) -> float:
+        return math.hypot(self.b[0] - self.a[0], self.b[1] - self.a[1])
+
+    def signed_distance(self, point: Point) -> float:
+        """Noktanın çizgiye işaretli dik uzaklığı (piksel)."""
+        uzunluk = self.length
+        if uzunluk == 0:
+            return 0.0
+        return self.side(point) / uzunluk
+
 
 def _yon(a: Point, b: Point, c: Point) -> float:
     return (b[0] - a[0]) * (c[1] - a[1]) - (b[1] - a[1]) * (c[0] - a[0])
@@ -95,7 +118,11 @@ class ZoneManager:
 
     zones: list[Zone]
     lines: list[CrossingLine]
-    _previous: dict[int, Point] = field(default_factory=dict, init=False)
+    crossing_band_px: float = VARSAYILAN_BANT_PX
+    # (track, çizgi) -> (tarafın son kesin olarak bilindiği nokta, taraf işareti)
+    _confident: dict[tuple[int, str], tuple[Point, int]] = field(
+        default_factory=dict, init=False
+    )
     _counted: set[tuple[int, str, str]] = field(default_factory=set, init=False)
     _total_in: int = field(default=0, init=False)
     _total_out: int = field(default=0, init=False)
@@ -103,7 +130,9 @@ class ZoneManager:
     # --- yükleme --------------------------------------------------------
 
     @classmethod
-    def from_file(cls, path: str | Path) -> ZoneManager:
+    def from_file(
+        cls, path: str | Path, crossing_band_px: float = VARSAYILAN_BANT_PX
+    ) -> ZoneManager:
         yol = Path(path)
         if not yol.exists():
             raise ZoneConfigError(f"Bölge tanım dosyası bulunamadı: {yol}")
@@ -113,10 +142,12 @@ class ZoneManager:
         except json.JSONDecodeError as hata:
             raise ZoneConfigError(f"Bölge tanım dosyası okunamadı ({yol}): {hata}") from hata
 
-        return cls.from_dict(tanim)
+        return cls.from_dict(tanim, crossing_band_px=crossing_band_px)
 
     @classmethod
-    def from_dict(cls, tanim: dict) -> ZoneManager:
+    def from_dict(
+        cls, tanim: dict, crossing_band_px: float = VARSAYILAN_BANT_PX
+    ) -> ZoneManager:
         ham_bolgeler = tanim.get("zones") or []
         if not ham_bolgeler:
             raise ZoneConfigError("Tanım dosyasında en az bir bölge olmalı.")
@@ -153,7 +184,7 @@ class ZoneManager:
             )
 
         logger.info("%d bölge, %d çizgi yüklendi.", len(bolgeler), len(cizgiler))
-        return cls(zones=bolgeler, lines=cizgiler)
+        return cls(zones=bolgeler, lines=cizgiler, crossing_band_px=crossing_band_px)
 
     # --- sorgular -------------------------------------------------------
 
@@ -186,25 +217,44 @@ class ZoneManager:
 
         olaylar = self._gecisleri_bul(tracks, ts)
 
-        # Sadece bu karede görülen kişilerin konumu hatırlanır; kareden çıkan
+        # Sadece bu karede görülen kişilerin geçmişi hatırlanır; kareden çıkan
         # birinin eski konumundan geçiş çıkarmak yanlış sayıma yol açar.
-        self._previous = {iz.track_id: iz.foot_point for iz in tracks}
+        gorulen = {iz.track_id for iz in tracks}
+        self._confident = {
+            anahtar: deger for anahtar, deger in self._confident.items() if anahtar[0] in gorulen
+        }
 
         return sayilar, olaylar
 
     def _gecisleri_bul(self, tracks: Sequence[Track], ts: datetime) -> list[ZoneEvent]:
         olaylar: list[ZoneEvent] = []
         for iz in tracks:
-            onceki = self._previous.get(iz.track_id)
-            if onceki is None:
-                continue  # ilk kez görülüyor, geçiş çıkarılamaz
             simdiki = iz.foot_point
 
             for cizgi in self.lines:
-                if not segmentler_kesisiyor(onceki, simdiki, cizgi.a, cizgi.b):
+                uzaklik = cizgi.signed_distance(simdiki)
+                if abs(uzaklik) < self.crossing_band_px:
+                    # Kararsız bant: taraf güvenilir değil, durum korunur.
                     continue
 
-                tur = "enter" if cizgi.side(simdiki) > 0 else "exit"
+                taraf = 1 if uzaklik > 0 else -1
+                durum_anahtari = (iz.track_id, cizgi.name)
+                onceki = self._confident.get(durum_anahtari)
+                self._confident[durum_anahtari] = (simdiki, taraf)
+
+                if onceki is None:
+                    continue  # ilk kesin gözlem, geçiş çıkarılamaz
+
+                onceki_nokta, onceki_taraf = onceki
+                if taraf == onceki_taraf:
+                    continue
+
+                # Taraf değişti; kişi çizgi *parçasının* üzerinden mi geçti,
+                # yoksa ucundan mı dolaştı?
+                if not segmentler_kesisiyor(onceki_nokta, simdiki, cizgi.a, cizgi.b):
+                    continue
+
+                tur = "enter" if taraf > 0 else "exit"
                 anahtar = (iz.track_id, cizgi.name, tur)
                 if anahtar in self._counted:
                     logger.debug("Tekrar geçiş yok sayıldı: %s", anahtar)

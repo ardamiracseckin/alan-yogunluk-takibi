@@ -76,7 +76,9 @@ def build_pipeline(ayarlar: Settings) -> tuple[Pipeline, Storage]:
         video_source=VideoSource(ayarlar.source, loop=ayarlar.loop_video),
         detector=YoloPersonDetector(ayarlar.model_path, conf=ayarlar.conf_threshold),
         tracker=PersonTracker(),
-        zones=ZoneManager.from_file(ayarlar.zones_path),
+        zones=ZoneManager.from_file(
+            ayarlar.zones_path, crossing_band_px=ayarlar.crossing_band_px
+        ),
         storage=depo,
         snapshot_interval_sec=ayarlar.snapshot_interval_sec,
     )

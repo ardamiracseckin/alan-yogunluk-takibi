@@ -118,6 +118,54 @@ def test_kaybolan_track_gecmisi_unutulur(yonetici):
     assert olaylar == []  # geçmiş yok, geçiş çıkarılamaz
 
 
+class TestHisterezis:
+    """Çizgi civarındaki salınımın sayacı şişirmemesi.
+
+    Gerçek videoda gözlenen hata: kişi çizgiyi geçtikten hemen sonra bbox'ın
+    ayak noktası birkaç piksel geri kayıyor, sistem bunu ters yönde ikinci bir
+    geçiş sanıyordu. Sonuç: her gerçek geçiş için bir fazladan olay.
+    """
+
+    def test_cizgi_civarinda_salinim_olay_uretmez(self, yonetici):
+        for y in (295, 305, 296, 304, 298):
+            yonetici.update([_track(1, 500, y)], TS)
+
+        assert yonetici.totals == (0, 0)
+
+    def test_gecisten_sonra_geri_kayma_ters_olay_uretmez(self, yonetici):
+        yonetici.update([_track(1, 500, 250)], TS)  # dışarıda, banttan uzak
+        _, olaylar = yonetici.update([_track(1, 500, 350)], TS)  # içeri geçti
+        assert [o.event_type for o in olaylar] == ["enter"]
+
+        # Ayak noktası çizginin birkaç piksel üstüne kayıyor: çıkış değil.
+        _, olaylar = yonetici.update([_track(1, 500, 296)], TS)
+
+        assert olaylar == []
+        assert yonetici.totals == (1, 0)
+
+    def test_bandi_asan_gercek_donus_sayilir(self, yonetici):
+        yonetici.update([_track(1, 500, 250)], TS)
+        yonetici.update([_track(1, 500, 350)], TS)  # giriş
+        _, olaylar = yonetici.update([_track(1, 500, 240)], TS)  # gerçekten geri çıktı
+
+        assert [o.event_type for o in olaylar] == ["exit"]
+        assert yonetici.totals == (1, 1)
+
+    def test_bant_icinden_gecen_yol_kesintili_izlenir(self, yonetici):
+        """Banttan geçen ara kareler durumu bozmaz, geçiş yine bir kez sayılır."""
+        for y in (250, 290, 300, 310, 350):
+            yonetici.update([_track(1, 500, y)], TS)
+
+        assert yonetici.totals == (1, 0)
+
+    def test_bant_genisligi_ayarlanabilir(self, tmp_path):
+        dar = ZoneManager.from_file(_yaz(tmp_path), crossing_band_px=2.0)
+        dar.update([_track(1, 500, 295)], TS)
+        _, olaylar = dar.update([_track(1, 500, 305)], TS)
+
+        assert [o.event_type for o in olaylar] == ["enter"]
+
+
 def test_polygon_alani_hesaplanir(yonetici):
     assert yonetici.polygon_area("salon") == pytest.approx(800 * 400)
 

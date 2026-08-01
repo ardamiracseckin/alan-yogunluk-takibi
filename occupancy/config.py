@@ -36,6 +36,9 @@ class Settings(BaseSettings):
 
     # Aşama 4 — bölge analizi
     zones_path: Path = Path("ornek/zones.json")
+    # Geçiş çizgisinin iki yanındaki kararsız bant: ayak noktası bu kadar
+    # piksel uzaklaşmadan taraf değiştirmiş sayılmaz (bkz. occupancy/zones.py).
+    crossing_band_px: float = Field(default=25.0, ge=0.0)
 
     # Aşama 6/7 — depolama ve raporlama
     db_path: Path = Path("data/occupancy.db")
