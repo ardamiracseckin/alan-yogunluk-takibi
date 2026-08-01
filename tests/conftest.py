@@ -48,6 +48,26 @@ class FakeTracker:
         ]
 
 
+class FakeVideoSource:
+    """Belirli sayıda siyah kare üretip biten sahte video kaynağı."""
+
+    def __init__(self, frame_count: int = 3, shape: tuple[int, int] = (480, 640)):
+        self.frame_count = frame_count
+        self.shape = shape
+        self.closed = False
+
+    @property
+    def is_open(self) -> bool:
+        return not self.closed
+
+    def frames(self):
+        for _ in range(self.frame_count):
+            yield np.zeros((*self.shape, 3), dtype=np.uint8)
+
+    def close(self) -> None:
+        self.closed = True
+
+
 def kisi(x: int, y: int, genislik: int = 40, yukseklik: int = 100, guven: float = 0.9) -> Detection:
     """Ayak noktası (x, y) olan bir kişi tespiti üretir."""
     return Detection(
