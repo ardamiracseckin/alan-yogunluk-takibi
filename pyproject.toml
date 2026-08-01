@@ -7,6 +7,9 @@ requires-python = ">=3.11"
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-q"
+# Proje kökü sys.path'e eklenir; `pytest` doğrudan çağrıldığında da
+# `occupancy` paketi bulunur (CI kurulum adımı paketi kurmuyor).
+pythonpath = ["."]
 
 [tool.ruff]
 line-length = 100
