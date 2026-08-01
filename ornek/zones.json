@@ -1,0 +1,17 @@
+{
+  "_aciklama": "1280x720 kare için örnek tanım. Kendi videonuz için tools/roi_ciz.py ile yeniden üretin.",
+  "zones": [
+    {
+      "name": "salon",
+      "polygon": [[120, 260], [1160, 260], [1160, 700], [120, 700]]
+    }
+  ],
+  "lines": [
+    {
+      "name": "kapi",
+      "zone": "salon",
+      "a": [120, 260],
+      "b": [1160, 260]
+    }
+  ]
+}
