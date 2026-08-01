@@ -10,12 +10,13 @@
       "polygon": [[0, 660], [820, 660], [820, 1080], [0, 1080]]
     }
   ],
+  "_cizgi_yonu": "a'dan b'ye bakarken sagdan sola gecmek giris sayilir; burada kameradan uzaklasip caddenin icine yurumek 'giris'tir.",
   "lines": [
     {
       "name": "gecis",
       "zone": "yaya_yolu",
-      "a": [1000, 850],
-      "b": [1920, 850]
+      "a": [1920, 850],
+      "b": [1000, 850]
     }
   ]
 }
