@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Alan Kullanım ve Yoğunluk Takibi</title>
+    <link rel="stylesheet" href="/static/style.css" />
+  </head>
+  <body>
+    <header class="ust-bar">
+      <div class="marka">
+        <span class="nokta" id="durum-noktasi" aria-hidden="true"></span>
+        <h1>Alan Kullanım ve Yoğunluk Takibi</h1>
+      </div>
+      <div class="ust-sag">
+        <span id="fps" class="rozet">— FPS</span>
+        <a class="rozet baglanti" id="rapor-linki" href="/api/report?format=csv" download>
+          Günlük CSV raporu
+        </a>
+      </div>
+    </header>
+
+    <div id="uyari" class="uyari gizli" role="alert">
+      Kaynak bağlantısı yok — video akışı bekleniyor.
+    </div>
+
+    <main class="izgara">
+      <section class="kart video-kart">
+        <h2>Canlı görüntü</h2>
+        <div class="video-cerceve">
+          <img id="canli" src="/video_feed" alt="Canlı kamera görüntüsü" />
+        </div>
+      </section>
+
+      <section class="olcumler">
+        <div class="kart olcum">
+          <span class="etiket">Alandaki kişi</span>
+          <strong id="doluluk" class="deger">0</strong>
+        </div>
+        <div class="kart olcum">
+          <span class="etiket">Toplam giriş</span>
+          <strong id="giris" class="deger yesil">0</strong>
+        </div>
+        <div class="kart olcum">
+          <span class="etiket">Toplam çıkış</span>
+          <strong id="cikis" class="deger kirmizi">0</strong>
+        </div>
+        <div class="kart olcum bolge-kart">
+          <span class="etiket">Bölgeler</span>
+          <ul id="bolgeler" class="bolge-listesi">
+            <li class="bos">Bölge verisi bekleniyor…</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="kart grafik-kart">
+        <h2>Son 30 dakika — doluluk</h2>
+        <canvas id="grafik" height="220"></canvas>
+      </section>
+
+      <section class="kart isi-kart">
+        <h2>Yoğunluk haritası</h2>
+        <img id="isi" src="/api/heatmap.png" alt="Birikimli yoğunluk haritası" />
+      </section>
+    </main>
+
+    <footer class="alt-bar">
+      Yoğunluk değerleri piksel alanına göre hesaplanır (1000 piksel² başına kişi);
+      metre karşılığı kamera kalibrasyonu gerektirir.
+    </footer>
+
+    <script src="/static/app.js"></script>
+  </body>
+</html>

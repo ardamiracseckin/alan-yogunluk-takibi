@@ -1,0 +1,244 @@
+:root {
+  --zemin: #0e1116;
+  --yuzey: #171b22;
+  --yuzey-2: #1f242d;
+  --kenar: #2a313c;
+  --metin: #e6eaf0;
+  --metin-sonuk: #8b95a5;
+  --vurgu: #4da3ff;
+  --yesil: #3ddc84;
+  --kirmizi: #ff6b6b;
+  --amber: #ffc857;
+  --radius: 12px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--zemin);
+  color: var(--metin);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* --- üst bar --- */
+
+.ust-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 14px 22px;
+  background: var(--yuzey);
+  border-bottom: 1px solid var(--kenar);
+}
+
+.marka {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.marka h1 {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin: 0;
+  letter-spacing: 0.2px;
+}
+
+.nokta {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--metin-sonuk);
+  box-shadow: 0 0 0 3px rgb(139 149 165 / 18%);
+}
+
+.nokta.canli {
+  background: var(--yesil);
+  box-shadow: 0 0 0 3px rgb(61 220 132 / 20%);
+}
+
+.nokta.kopuk {
+  background: var(--kirmizi);
+  box-shadow: 0 0 0 3px rgb(255 107 107 / 20%);
+}
+
+.ust-sag {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rozet {
+  font-size: 0.8rem;
+  color: var(--metin-sonuk);
+  background: var(--yuzey-2);
+  border: 1px solid var(--kenar);
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.baglanti {
+  color: var(--vurgu);
+  text-decoration: none;
+}
+
+.baglanti:hover {
+  border-color: var(--vurgu);
+}
+
+/* --- uyarı --- */
+
+.uyari {
+  margin: 12px 22px 0;
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  background: rgb(255 107 107 / 12%);
+  border: 1px solid rgb(255 107 107 / 35%);
+  color: #ffb4b4;
+  font-size: 0.9rem;
+}
+
+.gizli {
+  display: none;
+}
+
+/* --- yerleşim --- */
+
+.izgara {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+  gap: 16px;
+  padding: 16px 22px 24px;
+  align-items: start;
+}
+
+.kart {
+  background: var(--yuzey);
+  border: 1px solid var(--kenar);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+.kart h2 {
+  margin: 0 0 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--metin-sonuk);
+}
+
+.video-cerceve {
+  background: #000;
+  border-radius: 8px;
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.video-cerceve img,
+.isi-kart img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.olcumler {
+  display: grid;
+  gap: 12px;
+}
+
+.olcum {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.etiket {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--metin-sonuk);
+}
+
+.deger {
+  font-size: 2.4rem;
+  font-weight: 650;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+}
+
+.yesil {
+  color: var(--yesil);
+}
+
+.kirmizi {
+  color: var(--kirmizi);
+}
+
+.bolge-listesi {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.bolge-listesi li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.9rem;
+  padding: 6px 10px;
+  background: var(--yuzey-2);
+  border-radius: 8px;
+}
+
+.bolge-listesi .bos {
+  color: var(--metin-sonuk);
+  justify-content: flex-start;
+}
+
+.bolge-listesi .sayi {
+  font-variant-numeric: tabular-nums;
+  color: var(--vurgu);
+  font-weight: 600;
+}
+
+.grafik-kart canvas {
+  width: 100%;
+  display: block;
+}
+
+.isi-kart img {
+  border-radius: 8px;
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+
+/* --- alt bar --- */
+
+.alt-bar {
+  padding: 0 22px 28px;
+  color: var(--metin-sonuk);
+  font-size: 0.82rem;
+  max-width: 70ch;
+}
+
+@media (max-width: 900px) {
+  .izgara {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
