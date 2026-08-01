@@ -1,4 +1,7 @@
 ultralytics>=8.3,<9
+# ByteTrack'in Macar eşleştirme algoritması; ultralytics bunu çalışma anında
+# kendi kendine indirmeye çalışıyor, açıkça sabitliyoruz.
+lap>=0.5.12
 opencv-python>=4.10,<6
 numpy>=1.26,<3
 fastapi>=0.115
