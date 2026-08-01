@@ -159,3 +159,8 @@ def test_bilinmeyen_bolgeye_bagli_cizgi_reddedilir(tmp_path):
 def test_bolge_tanimsizsa_reddedilir(tmp_path):
     with pytest.raises(ZoneConfigError, match="en az bir bölge"):
         ZoneManager.from_file(_yaz(tmp_path, {"zones": [], "lines": []}))
+
+
+def test_alan_saf_python_float_dondurur(yonetici):
+    """numpy skaları JSON'a sızmamalı: API sözleşmesi saf tiplerle kurulu."""
+    assert type(yonetici.polygon_area("salon")) is float

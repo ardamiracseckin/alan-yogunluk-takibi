@@ -1,17 +1,21 @@
 {
-  "_aciklama": "1280x720 kare için örnek tanım. Kendi videonuz için tools/roi_ciz.py ile yeniden üretin.",
+  "_aciklama": "ornek/demo.mp4 (1920x1080) için hazır tanım. Kendi videonuz için: python tools/roi_ciz.py --source <video> --out ornek/zones.json",
   "zones": [
     {
-      "name": "salon",
-      "polygon": [[120, 260], [1160, 260], [1160, 700], [120, 700]]
+      "name": "yaya_yolu",
+      "polygon": [[1120, 620], [1560, 620], [1920, 1070], [840, 1070]]
+    },
+    {
+      "name": "kafe",
+      "polygon": [[0, 660], [820, 660], [820, 1080], [0, 1080]]
     }
   ],
   "lines": [
     {
-      "name": "kapi",
-      "zone": "salon",
-      "a": [120, 260],
-      "b": [1160, 260]
+      "name": "gecis",
+      "zone": "yaya_yolu",
+      "a": [1000, 850],
+      "b": [1920, 850]
     }
   ]
 }

@@ -31,7 +31,8 @@ def zone_density(count: int, area_px: float) -> float:
     """Bölgedeki kişi yoğunluğu: 1000 piksel² başına kişi sayısı."""
     if area_px <= 0 or count <= 0:
         return 0.0
-    return count / area_px * REFERANS_ALAN_PIKSEL
+    # float() şart: numpy skaları JSON'a sızıp API sözleşmesini bozuyor.
+    return float(count / area_px * REFERANS_ALAN_PIKSEL)
 
 
 class DensityMap:

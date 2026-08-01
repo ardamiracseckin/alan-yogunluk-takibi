@@ -51,7 +51,8 @@ class Zone:
         """Poligon alanı (piksel²), ayakkabı bağı formülü."""
         x = self.polygon[:, 0].astype(float)
         y = self.polygon[:, 1].astype(float)
-        return 0.5 * abs(np.dot(x, np.roll(y, -1)) - np.dot(y, np.roll(x, -1)))
+        # float() şart: numpy skaları JSON'a sızıp API sözleşmesini bozuyor.
+        return float(0.5 * abs(np.dot(x, np.roll(y, -1)) - np.dot(y, np.roll(x, -1))))
 
     def contains(self, point: Point) -> bool:
         """Nokta poligonun içinde mi? Kenar üstü içeride sayılır."""

@@ -75,3 +75,9 @@ def test_arka_plan_ile_harmanlama_ayni_boyutu_korur():
 
 def test_bos_haritada_png_uretilebilir():
     assert DensityMap(shape=(60, 80), sigma=5).to_png_bytes().startswith(PNG_IMZASI)
+
+
+def test_yogunluk_saf_python_float_dondurur():
+    import numpy as np
+
+    assert type(zone_density(3, np.float64(1000.0))) is float
