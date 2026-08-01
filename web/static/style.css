@@ -219,6 +219,8 @@ body {
 
 .grafik-kart canvas {
   width: 100%;
+  /* Yükseklik CSS'te sabitlenir; app.js ölçüleri buradan okur. */
+  height: 220px;
   display: block;
 }
 

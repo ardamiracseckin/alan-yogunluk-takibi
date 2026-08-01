@@ -89,15 +89,16 @@ function zamanaGoreTopla(satirlar) {
 function grafigiCiz(noktalar) {
   const canvas = el("grafik");
   const olcek = window.devicePixelRatio || 1;
+  // Ölçüler her zaman CSS'ten okunur. `canvas.height` (piksel tamponu)
+  // okunursa retina ekranda her çizimde ölçekle çarpılıp katlanarak büyür.
   const genislik = canvas.clientWidth;
-  const yukseklik = canvas.height;
+  const yukseklik = canvas.clientHeight;
 
   canvas.width = genislik * olcek;
-  canvas.style.height = `${yukseklik}px`;
   canvas.height = yukseklik * olcek;
 
   const ctx = canvas.getContext("2d");
-  ctx.scale(olcek, olcek);
+  ctx.setTransform(olcek, 0, 0, olcek, 0, 0);
   ctx.clearRect(0, 0, genislik, yukseklik);
 
   const pad = { ust: 12, sag: 12, alt: 26, sol: 36 };
